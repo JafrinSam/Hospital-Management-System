@@ -8,7 +8,11 @@ export default function Sidebar() {
     SuperAdmin: [
       { name: 'Manage patients', path: '/patient' },
       { name: 'Manage Users', path: '/superadmin/users' },
-      { name:'Manage lab', path: '/lab'}
+      { name:'Manage lab', path: '/lab'},
+      { name: 'Finance Dashboard', path: '/finance' },
+      { name: 'Doctor Dashboard', path: '/doctor' },
+      { name: 'Nurse Dashboard', path: '/nurse' },
+      { name: 'Pharmacy Dashboard', path: '/pharmacy' },
     ],
     HospitalAdmin: [
       { name: 'Manage Staff', path: '/hospital/staff' },

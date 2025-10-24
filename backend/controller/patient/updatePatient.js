@@ -1,7 +1,7 @@
-const Patient= require("../models/Patient.js");
-const User= require("../models/User.js");
+const Patient= require("../../models/Patient");
+const User= require("../../models/userModel");
 
-export const updatePatient = async (req, res) => {
+exports.updatePatient = async (req, res) => {
   try {
     const { id } = req.params; // Patient ID
     const { userData, patientData } = req.body;

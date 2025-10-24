@@ -1,4 +1,4 @@
-const express = reqire("express");
+const express = require("express");
 const {
 updatePatient
 } = require ("../controller/patient/updatePatient.js");
@@ -17,4 +17,5 @@ router.get("/:id", getPatientById);
 router.put("/:id", updatePatient);
 router.delete("/:id", deletePatient);
 
-export default router;
+module.exports = router;
+

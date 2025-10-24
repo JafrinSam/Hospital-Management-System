@@ -1,9 +1,19 @@
+// models/User.js
 const mongoose = require("mongoose");
-// const { v4: uuidv4 } = require("uuid");
 
 const UserSchema = new mongoose.Schema({
-  // _id: { type: String, default: () => uuidv4(), required: true },
-
+  // ✅ Basic info
+  name: {
+    type: String,
+    required: [true, "Name is required."],
+    trim: true,
+  },
+  email: {
+    type: String,
+    lowercase: true,
+    unique: true,
+    sparse: true,
+  },
   phone: {
     type: String,
     unique: true,
@@ -20,16 +30,42 @@ const UserSchema = new mongoose.Schema({
     },
   },
 
+  // ✅ Role and Demographics
   role: {
     type: String,
-    enum: ["Admin", "User"],
-    default: "User",
+    enum: ["Patient", "Doctor", "Nurse", "Staff", "Admin"],
+    required: true,
+    default: "Patient",
+  },
+  sex: {
+    type: String,
+    enum: ["Male", "Female", "Other"],
+  },
+  age: {
+    type: Number,
+    min: 0,
+  },
+  occupation: {
+    type: String,
+    trim: true,
+  },
+  address: {
+    street: String,
+    city: String,
+    state: String,
+    pincode: {
+      type: String,
+      match: /^[1-9][0-9]{5}$/,
+    },
   },
 
-  publicKey: { type: String, required: true }, // main identity key
-
+  // ✅ Security & Device Identity
+  publicKey: {
+    type: String,
+    required: false, // optional for hospital users
+  },
   device: {
-    deviceId: { type: String, required: true },
+    deviceId: { type: String },
     deviceName: String,
     lastSeen: Date,
     lastIP: String,
@@ -37,34 +73,40 @@ const UserSchema = new mongoose.Schema({
     addedAt: { type: Date, default: Date.now },
   },
 
+  // ✅ Contact/Relationship Graph (for communication modules)
   allowedContacts: [
     {
       contactId: {
-        type: String,
-        ref: "User", // references the User model
-        required: true,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
       },
-      type: { type: String, enum: ["Group", "Contact"], default: "Contact" },
+      type: {
+        type: String,
+        enum: ["Group", "Contact"],
+        default: "Contact",
+      },
       alias: String,
       lastVerifiedAt: { type: Date, default: Date.now },
       addedAt: { type: Date, default: Date.now },
     },
   ],
 
+  // ✅ Meta Info
   createdAt: { type: Date, default: Date.now },
 });
 
-// 🧩 Virtual populate: Resolve contact’s publicKey from User model
+// 🧩 Virtual populate: auto-populate contact info
 UserSchema.virtual("allowedContactsInfo", {
-  ref: "Users",
+  ref: "User",
   localField: "allowedContacts.contactId",
   foreignField: "_id",
   justOne: false,
-  select: "publicKey phone role", // choose fields to auto-populate
+  select: "publicKey phone role name",
 });
 
-// Ensure virtuals appear when converting to JSON or Object
+// Ensure virtuals appear in JSON/object conversions
 UserSchema.set("toJSON", { virtuals: true });
 UserSchema.set("toObject", { virtuals: true });
 
-module.exports = mongoose.model("User", UserSchema);
+const User = mongoose.model("User", UserSchema);
+module.exports = User;

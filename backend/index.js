@@ -10,7 +10,6 @@ const { connectRedis, pubClient, subClient } = require("./config/redisClient");
 const connectMongo = require("./config/ConnectMongo"); // Mongo
 
 // Socket server
-const { initSocketServer } = require("./sockets/socketServer");
 
 const { createServer } = require("http");
 const app = express();
@@ -28,9 +27,6 @@ const port = process.env.PORT || 3000;
   try {
     // CHANGED: Added connectRedis() to the Promise.all array
     await Promise.all([connectMongo(), connectRedis()]);
-
-    // CHANGED: Pass the connected pubClient and subClient to the socket server
-    await initSocketServer(server, { pubClient, subClient });
 
     // register routes
     app.use("/api", require("./routes/index"));

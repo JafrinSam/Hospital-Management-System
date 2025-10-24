@@ -1,13 +1,11 @@
 const express = require("express");
+const { updatePatient } = require("../controller/patient/updatePatient.js");
 const {
-updatePatient
-} = require ("../controller/patient/updatePatient.js");
-const {
-createPatient,
+  createPatient,
   getAllPatients,
   getPatientById,
-  deletePatient
-} =  require("../controller/patient/createPatient.js");
+  deletePatient,
+} = require("../controller/patient/createPatient.js");
 
 const router = express.Router();
 
@@ -18,4 +16,3 @@ router.put("/:id", updatePatient);
 router.delete("/:id", deletePatient);
 
 module.exports = router;
-

@@ -1,14 +1,32 @@
-const Patient= require("../../models/Patient");
-const User= require("../../models/userModel");
+const Patient = require("../../models/Patient");
+const User = require("../../models/userModel");
 
 exports.createPatient = async (req, res) => {
   try {
-    const { name, age, gender, email, phone, address, aadharCardNumber, bloodGroup } = req.body;
+    const {
+      name,
+      age,
+      gender,
+      email,
+      phone,
+      address,
+      aadharCardNumber,
+      bloodGroup,
+    } = req.body;
 
-    const user = await User.create({ name, age, gender, role: "Patient", email, phone, address });
+    const user = await User.create({
+      name,
+      age,
+      gender,
+      role: "Patient",
+      email,
+      phone,
+      address,
+    });
+    console.log(user._id);
 
     const patient = await Patient.create({
-      user: user._id,
+      userId: user._id,
       aadharCardNumber,
       bloodGroup,
     });
@@ -31,7 +49,9 @@ exports.getAllPatients = async (req, res) => {
 exports.updatePatient = async (req, res) => {
   try {
     const { id } = req.params;
-    const patient = await Patient.findByIdAndUpdate(id, req.body, { new: true });
+    const patient = await Patient.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
     res.json(patient);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -47,7 +67,6 @@ exports.deletePatient = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 exports.getPatientById = async (req, res) => {
   try {

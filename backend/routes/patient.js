@@ -1,13 +1,13 @@
-import express from "express";
-import {
+const express = reqire("express");
+const {
 updatePatient
-} from "../controller/patient/updatePatient.js";
-import {
+} = require ("../controller/patient/updatePatient.js");
+const {
 createPatient,
   getAllPatients,
   getPatientById,
   deletePatient
-} from "../controller/patient/createPatient.js";
+} =  require("../controller/patient/createPatient.js");
 
 const router = express.Router();
 

@@ -1,5 +1,5 @@
-import Patient from "../models/Patient.js";
-import User from "../models/User.js";
+const Patient= require("../models/Patient.js");
+const User= require("../models/User.js");
 
 export const createPatient = async (req, res) => {
   try {

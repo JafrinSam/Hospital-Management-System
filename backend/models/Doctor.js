@@ -1,5 +1,6 @@
 // models/Doctor.js
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
+
 
 const doctorSchema = new mongoose.Schema({
   userId: {

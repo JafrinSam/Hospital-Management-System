@@ -1,5 +1,5 @@
 // models/Nurse.js
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const nurseSchema = new mongoose.Schema({
   userId: {

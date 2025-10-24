@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "KareXpert",
+    "slug": "KareXpert",
+    "scheme": "medaithonapp",
+    "version": "1.0.0",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "projectId": "2866abc6-fe07-4720-9008-fb6e75ed5830",
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.v03.KareXpert"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2866abc6-fe07-4720-9008-fb6e75ed5830"
+      }
+    }
+  }
+}

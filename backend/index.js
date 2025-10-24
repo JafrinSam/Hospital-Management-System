@@ -28,6 +28,7 @@ const port = process.env.PORT || 3000;
     // CHANGED: Added connectRedis() to the Promise.all array
     await Promise.all([connectMongo(), connectRedis()]);
 
+    app.use("/api/patients", require("./routes/patient"));
     // register routes
     app.use("/api", require("./routes/index"));
     server.listen(port, "0.0.0.0", () => {

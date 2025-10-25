@@ -13,6 +13,7 @@ export default function Sidebar() {
       { name: 'Doctor Dashboard', path: '/doctor' },
       { name: 'Nurse Dashboard', path: '/nurse' },
       { name: 'Pharmacy Dashboard', path: '/pharmacy' },
+      { name: "AI Triage Prediction", path: '/ai/triage-prediction' },
     ],
     HospitalAdmin: [
       { name: 'Manage Staff', path: '/hospital/staff' },

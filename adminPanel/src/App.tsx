@@ -29,6 +29,7 @@ import PharmacyDashboardPage from './pages/pharmacy/PharmacyDashboard';
 import PharmacyProductsPage from './pages/pharmacy/PharmacyProductsPage';
 import PharmacyProductDetailPage from './pages/pharmacy/PharmacyProductDetailPage';
 import StockCharts from './components/pharmacy/StockCharts';
+import TriagePredictionPage from './pages/AI/TriagePredictionPage';
 
 // Layout wrapper
 function MainLayout({ children }: { children: JSX.Element }) {
@@ -174,6 +175,17 @@ export default function App() {
               <ProtectedRoute roles={["SuperAdmin", "HospitalAdmin"]}>
                 <MainLayout>
                   <DoctorDetails/>
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/ai/triage-prediction"
+            element={
+              <ProtectedRoute roles={["SuperAdmin", "HospitalAdmin"]}>
+                <MainLayout>
+                 <TriagePredictionPage />
                 </MainLayout>
               </ProtectedRoute>
             }

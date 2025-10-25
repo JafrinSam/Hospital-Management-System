@@ -52,7 +52,7 @@ exports.otpVerification = async (req, res) => {
       message: "OTP verification successful.",
       accessToken,
       refreshToken,
-      user: { _id: user._id, phone: user.phone, role: user.role },
+      user: { _id: user._id, phone: user.phone, role: user.role, name: user.name },
     });
   } catch (error) {
     console.error("Login error:", error);

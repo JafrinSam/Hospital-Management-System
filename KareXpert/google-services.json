@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "909424308629",
+    "project_id": "medaithon-a18ad",
+    "storage_bucket": "medaithon-a18ad.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:909424308629:android:a2157e5307167ea32d469c",
+        "android_client_info": {
+          "package_name": "com.v03.KareXpert"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9VQQKUWZmy7FOSz-1w1CB7JHhREjQLjY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

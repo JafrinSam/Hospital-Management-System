@@ -14,8 +14,8 @@ import {
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useAppContext } from '../context/AppContext'; // 3. Import your AppContext hook
-import { QrCodeLogo } from '../components/QrCodeLogo';
+import { useAppContext } from '../../context/AppContext'; // 3. Import your AppContext hook
+import { QrCodeLogo } from '../../components/QrCodeLogo';
 import SearchIcon from 'components/SearchIcon';
 
 // This is no longer needed, we get it from context
@@ -24,10 +24,30 @@ import SearchIcon from 'components/SearchIcon';
 export default function HomeScreen() {
   const router = useRouter();
   // 4. Get the user state and loading status from context
-  const { isLoading } = useAppContext();
-  const user = true;
+  const { user, isLoading } = useAppContext();
+  console.log(user);
+
   // 5. Add effect to handle redirection
   useEffect(() => {
+    if (user) {
+      switch (user.role) {
+        case 'Patient':
+          return;
+
+        case 'Doctor':
+          router.replace('(home)/doctorhome');
+          break;
+
+        case 'Nurse':
+          router.replace('(home)/nursehome');
+          break;
+
+        default:
+          router.replace('/(auth)/LoginScreen');
+          break;
+      }
+    }
+
     // If we're done loading and there is NO user, redirect to login
     if (!isLoading && !user) {
       // Use 'replace' to prevent the user from navigating "back" to the home screen

@@ -9,23 +9,32 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
+// 1. Import Expo Router hooks
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { verifyOtpApi } from '../../services/api';
 import { useAppContext } from '../../context/AppContext';
 
 const OtpVerificationScreen = () => {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
-  const colors = useThemeColors();
-  const route = useRoute();
-  const navigation = useNavigation();
+
+  // 2. Add basic colors (theme removed)
+  const colors = {
+    background: '#ffffff',
+    text: '#111827',
+    textSecondary: '#9ca3af',
+    border: '#e5e7eb',
+    primary: '#2563eb',
+  };
+
+  // 3. Get params and router from Expo Router
+  const params = useLocalSearchParams();
+  const router = useRouter();
   const phone = params?.phone ?? '';
 
   // get functions from AppContext
-  const { deviceId, deviceName, signInWithTokens, setPhone, ensureChatKeypair, publicKey } =
-    useAppContext();
-
-  const [pushToken, setPushToken] = useState(null);
+  // This will now receive the functions we implemented
+  const { deviceId, deviceName, signInWithTokens, setPhone, pushToken } = useAppContext();
 
   const handleVerifyOtp = async () => {
     if (!otp || otp.length < 4) {
@@ -39,34 +48,30 @@ const OtpVerificationScreen = () => {
 
     setLoading(true);
     try {
-      // Ensure we have a local keypair (generates + saves if missing)
-      const kp = await ensureChatKeypair();
-      // kp.publicKey is available; pass to verify if backend expects it
-      const data = await verifyOtpApi(
-        phone,
-        otp,
-        deviceId,
-        deviceName,
-        kp?.publicKey ?? publicKey,
-        pushToken
-      );
+      console.log(pushToken);
+
+      const data = await verifyOtpApi(phone, otp, deviceId, deviceName, pushToken);
 
       const { accessToken, refreshToken, user } = data;
       if (!accessToken || !refreshToken) {
+        setLoading(false); // Stop loading before showing alert
         Alert.alert('Error', 'Missing tokens from server response.');
         return;
       }
 
+      // This will now correctly save the session
       await signInWithTokens({ accessToken, refreshToken }, user);
 
       try {
+        // This will now correctly save the phone number
         if (typeof setPhone === 'function') await setPhone(phone);
       } catch (err) {
         console.warn('[OtpVerificationScreen] failed to persist phone to keystore', err);
       }
 
-      Alert.alert('Success!', `Welcome, ${user?.phone ?? 'user'}`);
-      navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
+      // 4. Use router.replace to navigate to the main app layout
+      //    This replaces the entire (auth) stack, so the user can't go "back"
+      router.replace('/(home)');
     } catch (error) {
       Alert.alert('Error', error?.message ?? 'OTP verification failed');
     } finally {

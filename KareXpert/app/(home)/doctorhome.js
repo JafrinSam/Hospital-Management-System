@@ -1,3 +1,4 @@
+// src/screens/doctor/DoctorHomeScreen.jsx
 import React, { useState, useEffect } from 'react';
 import {
   Text,
@@ -8,11 +9,15 @@ import {
   StyleSheet,
   Modal,
   Pressable,
+  Alert,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Camera } from 'expo-camera';
+import { BarCodeScanner } from 'expo-barcode-scanner';
+import * as Haptics from 'expo-haptics';
+import * as Clipboard from 'expo-clipboard';
 
 import { useAppContext } from '../../context/AppContext';
 import { SearchIcon } from '../../components/SearchIcon';
@@ -22,18 +27,74 @@ export default function DoctorHomeScreen() {
   const { user, isLoading } = useAppContext();
 
   const [scannerVisible, setScannerVisible] = useState(false);
-  const [hasPermission, setHasPermission] = useState(null);
+  const [hasPermission, setHasPermission] = useState(null); // null | true | false
   const [scannedData, setScannedData] = useState(null);
+  const [scanned, setScanned] = useState(false); // to prevent duplicate scans
 
   useEffect(() => {
     (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
+      try {
+        const { status } = await BarCodeScanner.requestPermissionsAsync();
+        setHasPermission(status === 'granted');
+      } catch (e) {
+        console.warn('Barcode permission request failed', e);
+        setHasPermission(false);
+      }
     })();
   }, []);
 
-  const handleBarcodeScanned = ({ data }) => {
+  const handleBarCodeScanned = async ({ data, type }) => {
+    if (scanned) return;
+    setScanned(true);
     setScannedData(data);
+
+    try {
+      await Haptics.selectionAsync();
+    } catch (e) {
+      /* ignore haptic errors */
+    }
+
+    // OPTIONAL: auto-navigate when QR contains a patient id pattern
+    // Uncomment & adjust route/pattern if you want auto-navigation:
+    // const maybeId = data.match(/[0-9a-fA-F-]{6,}/);
+    // if (maybeId) {
+    //   router.push(`/doctor/patient/${maybeId[0]}`);
+    //   setScannerVisible(false);
+    //   return;
+    // }
+  };
+
+  const copyScanned = async () => {
+    if (!scannedData) return;
+    await Clipboard.setStringAsync(scannedData);
+    Alert.alert('Copied', 'Scanned data copied to clipboard');
+  };
+
+  const tryOpen = async () => {
+    if (!scannedData) return;
+    let url = scannedData;
+    // try to ensure URL has protocol
+    try {
+      new URL(url);
+    } catch (e) {
+      url = `http://${scannedData}`;
+    }
+    const can = await Linking.canOpenURL(url);
+    if (can) {
+      await Linking.openURL(url);
+    } else {
+      Alert.alert('Cannot open', 'Scanned data is not a valid URL');
+    }
+  };
+
+  const resetScanner = () => {
+    setScanned(false);
+    setScannedData(null);
+  };
+
+  const closeScanner = () => {
+    setScannerVisible(false);
+    resetScanner();
   };
 
   if (isLoading) {
@@ -74,12 +135,10 @@ export default function DoctorHomeScreen() {
           <Text style={styles.overviewSmallText}>9:00am to 6:00pm</Text>
 
           <TouchableOpacity
-  onPress={() => router.push('/doctor/profile')}
-  style={styles.viewScheduleButton}
->
-  <Text style={styles.viewScheduleText}>Doctor Profile</Text>
-</TouchableOpacity>
-
+            onPress={() => router.push('/doctor/profile')}
+            style={styles.viewScheduleButton}>
+            <Text style={styles.viewScheduleText}>Doctor Profile</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Quick Actions */}
@@ -94,39 +153,82 @@ export default function DoctorHomeScreen() {
         <View style={{ marginBottom: 24 }}>
           <Text style={styles.sectionTitle}>Patient Queue</Text>
           <PatientQueueCard patientName="Rohan Gupta" reason="Vitals Check" roomNumber="302A" />
-          <PatientQueueCard patientName="Sunita Patel" reason="Post-Op Follow-up" roomNumber="305B" />
+          <PatientQueueCard
+            patientName="Sunita Patel"
+            reason="Post-Op Follow-up"
+            roomNumber="305B"
+          />
           <PatientQueueCard patientName="Amit Singh" reason="Medication Admin" roomNumber="302A" />
-          <PatientQueueCard patientName="Neha Sharma" reason="Pre-Surgery Vitals" roomNumber="308C" />
+          <PatientQueueCard
+            patientName="Neha Sharma"
+            reason="Pre-Surgery Vitals"
+            roomNumber="308C"
+          />
         </View>
 
         {/* Report an Issue */}
         <Pressable
           onPress={() => console.log('Issue Reported')}
-          style={({ pressed }) => [styles.issueButton, { opacity: pressed ? 0.85 : 1 }]}
-        >
+          style={({ pressed }) => [styles.issueButton, { opacity: pressed ? 0.85 : 1 }]}>
           <Text style={styles.issueButtonText}>Report an Issue</Text>
         </Pressable>
       </ScrollView>
 
       {/* QR Scanner Modal */}
       <Modal visible={scannerVisible} transparent={true} animationType="fade">
-        <Pressable style={styles.modalOverlay} onPress={() => setScannerVisible(false)}>
+        <Pressable style={styles.modalOverlay} onPress={closeScanner}>
           <Pressable style={styles.modalContent} onPress={() => {}}>
-            {hasPermission ? (
-              <Camera
-                style={{ width: '100%', height: 400, borderRadius: 16 }}
-                onBarCodeScanned={scannedData ? undefined : handleBarcodeScanned}
-                barCodeScannerSettings={{ barCodeTypes: ['qr'] }}
-              />
-            ) : (
+            {hasPermission === null ? (
+              <Text style={{ color: 'white' }}>Requesting camera permission...</Text>
+            ) : hasPermission === false ? (
               <Text style={{ color: 'white', textAlign: 'center', fontSize: 16 }}>
-                Camera permission denied
+                No access to camera — grant permission from settings
               </Text>
-            )}
+            ) : (
+              <View style={{ width: '100%', alignItems: 'center' }}>
+                <View style={{ width: '100%', height: 400, borderRadius: 12, overflow: 'hidden' }}>
+                  <BarCodeScanner
+                    onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+                    style={{ flex: 1 }}
+                  />
+                </View>
 
-            {scannedData && (
-              <View style={{ padding: 12, backgroundColor: '#f3f4f6', borderRadius: 8, marginTop: 12 }}>
-                <Text style={{ textAlign: 'center', fontSize: 16, color: '#111827' }}>{scannedData}</Text>
+                {scannedData ? (
+                  <View
+                    style={{
+                      marginTop: 12,
+                      width: '100%',
+                      backgroundColor: '#fff',
+                      borderRadius: 10,
+                      padding: 12,
+                    }}>
+                    <Text style={{ color: '#111827', textAlign: 'center', marginBottom: 8 }}>
+                      {scannedData}
+                    </Text>
+
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                      <TouchableOpacity onPress={copyScanned} style={{ padding: 10 }}>
+                        <Text style={{ color: '#2563eb', fontWeight: '700' }}>Copy</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity onPress={tryOpen} style={{ padding: 10 }}>
+                        <Text style={{ color: '#2563eb', fontWeight: '700' }}>Open</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity onPress={resetScanner} style={{ padding: 10 }}>
+                        <Text style={{ color: '#ef4444', fontWeight: '700' }}>Reset</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity onPress={closeScanner} style={{ padding: 10 }}>
+                        <Text style={{ color: '#111827', fontWeight: '700' }}>Close</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ) : (
+                  <Text style={{ color: 'white', marginTop: 12 }}>
+                    Point the camera at a QR code
+                  </Text>
+                )}
               </View>
             )}
           </Pressable>
@@ -140,10 +242,7 @@ export default function DoctorHomeScreen() {
 const QuickActionButton = ({ title, icon, route }) => {
   const router = useRouter();
   return (
-    <TouchableOpacity
-      onPress={() => route && router.push(route)}
-      style={styles.quickActionButton}
-    >
+    <TouchableOpacity onPress={() => route && router.push(route)} style={styles.quickActionButton}>
       <Text style={{ fontSize: 36, marginBottom: 8 }}>{icon}</Text>
       <Text style={{ fontSize: 15, fontWeight: '600', color: '#111827' }}>{title}</Text>
     </TouchableOpacity>
@@ -167,18 +266,52 @@ const PatientQueueCard = ({ patientName, reason, roomNumber }) => (
 );
 
 const styles = StyleSheet.create({
-  loadingContainer: { flex: 1, backgroundColor: '#f3f4f6', justifyContent: 'center', alignItems: 'center' },
-  header: { marginBottom: 32, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#f3f4f6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    marginBottom: 32,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   welcomeText: { color: '#6b7280', fontSize: 16 },
   nameText: { color: '#111827', fontSize: 28, fontWeight: '700' },
   headerIcons: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  overviewCard: { marginBottom: 24, borderRadius: 20, backgroundColor: '#2563eb', padding: 20, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 6, elevation: 3 },
-  overviewTitle: { color: 'rgba(255,255,255,0.85)', marginBottom: 8, fontSize: 16, fontWeight: '600' },
+  overviewCard: {
+    marginBottom: 24,
+    borderRadius: 20,
+    backgroundColor: '#2563eb',
+    padding: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  overviewTitle: {
+    color: 'rgba(255,255,255,0.85)',
+    marginBottom: 8,
+    fontSize: 16,
+    fontWeight: '600',
+  },
   overviewBigText: { color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 4 },
   overviewSmallText: { color: 'rgba(255,255,255,0.9)', marginBottom: 16 },
-  viewScheduleButton: { backgroundColor: '#fff', padding: 12, borderRadius: 10, alignItems: 'center' },
+  viewScheduleButton: {
+    backgroundColor: '#fff',
+    padding: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
   viewScheduleText: { color: '#2563eb', fontSize: 16, fontWeight: '700' },
-  quickActions: { marginBottom: 24, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  quickActions: {
+    marginBottom: 24,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
   quickActionButton: {
     marginBottom: 16,
     height: 120,
@@ -206,8 +339,29 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 1,
   },
-  issueButton: { borderRadius: 20, borderWidth: 1, borderColor: '#e5e7eb', backgroundColor: '#fff', padding: 18, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, elevation: 1 },
+  issueButton: {
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#fff',
+    padding: 18,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
+  },
   issueButtonText: { textAlign: 'center', fontSize: 16, fontWeight: '600', color: '#111827' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
-  modalContent: { backgroundColor: 'black', padding: 12, borderRadius: 16, width: '90%', alignItems: 'center' },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'black',
+    padding: 12,
+    borderRadius: 16,
+    width: '90%',
+    alignItems: 'center',
+  },
 });

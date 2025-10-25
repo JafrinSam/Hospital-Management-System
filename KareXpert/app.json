@@ -18,7 +18,8 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-barcode-scanner"
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -39,7 +40,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.v03.KareXpert"
+      "package": "com.v03.KareXpert",
+      "googleServicesFile": "./google-services.json"
     },
     "extra": {
       "router": {},

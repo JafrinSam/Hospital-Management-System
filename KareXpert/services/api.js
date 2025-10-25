@@ -13,6 +13,8 @@ export const generateOtpApi = async (phone, deviceId, deviceName) => {
   };
 
   const endpoint = `${API_BASE_URL}/api/login/auth1`;
+  console.log(endpoint);
+
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

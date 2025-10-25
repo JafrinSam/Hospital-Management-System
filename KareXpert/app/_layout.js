@@ -14,7 +14,7 @@ export default function RootLayout() {
           {/* Only list screens that are in the root 'app' folder.
             The router will automatically find the (auth) and (home) groups.
           */}
-          <Stack.Screen name="index" />
+          <Stack.Screen name="(home)/index" />
 
           {/* <== REMOVE THESE TWO LINES ==> */}
           {/* <Stack.Screen name="(auth)" /> */}

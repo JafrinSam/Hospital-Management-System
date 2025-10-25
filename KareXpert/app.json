@@ -19,7 +19,6 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-barcode-scanner"
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",

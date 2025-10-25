@@ -1,28 +1,64 @@
-import User from "../models/User.js";
-import Doctor from "../models/Doctor.js";
-
-export const updateDoctor = async (req, res) => {
+const User = require("../../models/userModel");
+const Doctor = require("../../models/Doctor.js");
+exports.updateDoctor = async (req, res) => {
   try {
     const { id } = req.params; // Doctor ID
-    const { userData, doctorData } = req.body;
+    const {
+      name,
+      sex,
+      age,
+      email,
+      phone,
+      address,
+      specialization,
+      experienceYears,
+      licenseNumber,
+      department,
+      availability,
+    } = req.body;
 
+    // Step 1: Find Doctor
     const doctor = await Doctor.findById(id);
     if (!doctor) return res.status(404).json({ error: "Doctor not found" });
 
-    // Update doctor fields
-    if (doctorData) Object.assign(doctor, doctorData);
-    await doctor.save();
+    // Step 2: Update linked User
+    await User.findByIdAndUpdate(
+      doctor.userId,
+      {
+        name,
+        sex,
+        age,
+        email,
+        phone,
+        address,
+      },
+      { new: true }
+    );
 
-    // Update user fields
-    if (userData) {
-      const user = await User.findById(doctor.user);
-      Object.assign(user, userData);
-      await user.save();
-    }
+    // Step 3: Update Doctor fields
+    const updatedDoctor = await Doctor.findByIdAndUpdate(
+      id,
+      {
+        specialization,
+        experienceYears,
+        licenseNumber,
+        department,
+        availability: {
+          days: availability?.days || [],
+          timeSlots: availability?.timeSlots || [],
+        },
+      },
+      { new: true }
+    ).populate("userId");
 
-    const updatedDoctor = await Doctor.findById(id).populate("user");
-    res.json({ message: "Doctor updated successfully", updatedDoctor });
+    console.log("✅ Doctor updated:", updatedDoctor);
+
+    res.json({
+      message: "Doctor updated successfully",
+      doctor: updatedDoctor,
+    });
   } catch (error) {
+    console.error("❌ Error updating doctor:", error);
     res.status(500).json({ error: error.message });
   }
 };

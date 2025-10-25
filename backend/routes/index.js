@@ -7,4 +7,5 @@ router.get("/", (req, res) => res.json({ ok: true, service: "Unis" }));
 
 router.use("/login", require("./authRoutes"));
 router.use("/patients", require("./patientRoutes"));
+router.use("/doctors", require("./doctorRoutes"));
 module.exports = router;

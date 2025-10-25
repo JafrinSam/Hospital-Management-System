@@ -5,7 +5,11 @@ import { DoctorFormModal } from "../../components/doctor/DoctorFormModal";
 import { DoctorViewModal } from "../../components/doctor/DoctorViewModal";
 import { useDoctor } from "../../context/DoctorContext";
 
+
+
+const apiUrl = import.meta.env.VITE_BACKEND_URL;
 export default function DoctorDashboard() {
+  const {fetchDoctors } = useDoctor()
   const navigate = useNavigate();
 
   const { doctors, addDoctor, updateDoctor, deleteDoctor } = useDoctor();
@@ -31,13 +35,38 @@ export default function DoctorDashboard() {
 
 const handleView = (id: string) => {
   // (optional) Do any logic before navigation
-  navigate(`/doctor/${id}`);
+  console.log("Viewing doctor with ID:", id);
+  navigate(`${id}`);
 };
-  const handleSubmit = (doc: any) => {
-    if (editing) updateDoctor(doc);
-    else addDoctor({ ...doc, id: Math.random().toString(36).substring(2, 9) });
+
+
+const handleSubmit = async (doc: any) => {
+  try {
+    console.log("Submitting doctor data:", doc);
+    // API call to backend
+    if (editing) {
+      await fetch(`${apiUrl}/api/doctors/${doc.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(doc),
+      });
+       await fetchDoctors();
+    } else {
+      await fetch(`${apiUrl}/api/doctors`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(doc),
+      });
+      await fetchDoctors();
+    }
     setShowForm(false);
-  };
+    // Refresh doctor list
+  } catch (err) {
+    console.error(err);
+    alert("Failed to save doctor");
+  }
+};
+ console.log("Rendering DoctorDashboard with doctors:", doctors);
 
   return (
     <div className="p-6 text-white min-h-screen  space-y-6">
@@ -45,7 +74,7 @@ const handleView = (id: string) => {
         <h1 className="text-3xl font-bold text-gray-600">Doctor Admin Panel</h1>
         <button
           onClick={handleCreate}
-          className="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded"
+          className="bg-cyan hover:bg-cyan-600 px-4 py-2 rounded"
         >
           Add Doctor
         </button>
@@ -59,9 +88,8 @@ const handleView = (id: string) => {
               <th className="py-2">Name</th>
               <th>Email</th>
               <th>Department</th>
-              <th>In Time</th>
-              <th>Out Time</th>
-              <th>Patients Visited</th>
+              <th>Time slot </th>
+              <th>day availability</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -75,15 +103,46 @@ const handleView = (id: string) => {
             ) : (
               doctors.map((doc) => (
                 <tr key={doc.id} className="border-b border-gray-700">
-                  <td className="py-2">{doc.name}</td>
-                  <td>{doc.email}</td>
+                  <td className="py-2">{doc.userId.name}</td>
+                  <td>{doc.userId.email}</td>
                   <td>{doc.department}</td>
-                  <td>{doc.inTime}</td>
-                  <td>{doc.outTime}</td>
-                  <td>{doc.patientsVisited}</td>
+                  <td className="py-2">
+                    {doc.availability?.timeSlots?.length ? (
+                      <div className="flex flex-wrap gap-1">
+                        {doc.availability.timeSlots.map((slot, i) => (
+                          <span
+                            key={i}
+                            className="bg-green-900 text-white px-2 py-0.5 rounded-full text-xs"
+                          >
+                            {slot}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-sm">N/A</span>
+                    )}
+                  </td>
+
+                  <td className="py-2">
+                  {doc.availability?.days?.length ? (
+                    <div className="flex flex-wrap gap-1">
+                      {doc.availability.days.map((day, i) => (
+                        <span
+                          key={i}
+                          className="bg-blue-900 text-white px-2 py-0.5 rounded-full text-xs"
+                        >
+                          {day}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-gray-400 text-sm">N/A</span>
+                  )}
+                </td>
+
                   <td className="space-x-2 py-2">
                     <button
-                      onClick={() => handleView(doc.id)}
+                      onClick={() => handleView(doc._id)}
                       className="text-cyan-400 hover:text-cyan-200"
                     >
                       <Eye className="w-4 h-4 inline" />

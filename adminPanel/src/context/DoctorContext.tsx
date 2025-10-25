@@ -1,59 +1,106 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 
-export type Doctor = {
+const apiUrl = import.meta.env.VITE_BACKEND_URL;
+
+export interface Doctor {
   id: string;
   name: string;
   email: string;
-  phone?: string;
-  department?: string;
-  inTime?: string;
-  outTime?: string;
-  patientsVisited?: number;
-  schedule?: { day: string; inTime: string; outTime: string }[];
-};
+  phone: string;
+  department: string;
+  inTime: string;
+  outTime: string;
+  patientsVisited: number;
+  schedule: string[];
+  specialization?: string;
+  qualifications?: string[];
+  licenseNumber?: string;
+  availability?: {
+    days: string[];
+    timeSlots: string[];
+  };
+}
 
-type DoctorContextType = {
+interface DoctorContextType {
   doctors: Doctor[];
-  addDoctor: (doc: Doctor) => void;
-  updateDoctor: (doc: Doctor) => void;
+  addDoctor: (doctor: Doctor) => void;
+  updateDoctor: (doctor: Doctor) => void;
   deleteDoctor: (id: string) => void;
-};
+  getDoctorById: (id: string) => Doctor | undefined;
+  fetchDoctors: () => Promise<void>;
+}
 
-const DoctorContext = createContext<DoctorContextType | null>(null);
-
-export const DoctorProvider = ({ children }: { children: React.ReactNode }) => {
-  const [doctors, setDoctors] = useState<Doctor[]>([
-    {
-      id: '1',
-      name: 'Dr. John Doe',
-      email: 'john@hospital.com',
-      phone: '9876543210',
-      department: 'Cardiology',
-      inTime: '09:00',
-      outTime: '17:00',
-      patientsVisited: 20,
-      schedule: [
-        { day: 'Monday', inTime: '09:00', outTime: '17:00' },
-        { day: 'Tuesday', inTime: '09:00', outTime: '17:00' },
-      ],
-    },
-  ]);
-
-  const addDoctor = (doc: Doctor) => setDoctors(prev => [...prev, doc]);
-  const updateDoctor = (doc: Doctor) =>
-    setDoctors(prev => prev.map(d => (d.id === doc.id ? doc : d)));
-  const deleteDoctor = (id: string) =>
-    setDoctors(prev => prev.filter(d => d.id !== id));
-
-  return (
-    <DoctorContext.Provider value={{ doctors, addDoctor, updateDoctor, deleteDoctor }}>
-      {children}
-    </DoctorContext.Provider>
-  );
-};
+const DoctorContext = createContext<DoctorContextType | undefined>(undefined);
 
 export const useDoctor = () => {
   const context = useContext(DoctorContext);
-  if (!context) throw new Error("useDoctor must be used within DoctorProvider");
+  if (!context) throw new Error("useDoctor must be used within a DoctorProvider");
   return context;
+};
+
+export const DoctorProvider = ({ children }: { children: ReactNode }) => {
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+
+
+  // Fetch all doctors from backend
+  const fetchDoctors = async () => {
+    try {
+      const res = await fetch(`${apiUrl}/api/doctors`);
+      const data = await res.json();
+      
+      setDoctors(data);
+      console.log("Fetched doctors:", data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
+  // Fetch doctors from backend (optional)
+  useEffect(() => {
+    fetchDoctors()
+  }, []);
+
+const addDoctor = async (doctor: Doctor) => {
+  try {
+    await fetch(`${apiUrl}/api/doctors`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(doctor),
+    });
+    await fetchDoctors(); // refresh after adding
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const updateDoctor = async (doctor: Doctor) => {
+  try {
+    await fetch(`${apiUrl}/api/doctors/${doctor.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(doctor),
+    });
+    await fetchDoctors(); // refresh after updating
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const deleteDoctor = async (id: string) => {
+  try {
+    await fetch(`${apiUrl}/api/doctors/${id}`, { method: "DELETE" });
+    await fetchDoctors(); // refresh after deleting
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+  const getDoctorById = (id: string) => doctors.find((d) => d.id === id);
+
+  return (
+    <DoctorContext.Provider value={{ doctors, addDoctor, updateDoctor, deleteDoctor, getDoctorById, fetchDoctors }}>
+      {children}
+    </DoctorContext.Provider>
+  );
 };

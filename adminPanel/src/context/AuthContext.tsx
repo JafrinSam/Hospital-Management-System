@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import api from '../api/axiosClient';
+const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
 interface User {
   name: string;
@@ -78,6 +79,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+export const url = ()=>{
+  return apiUrl;
+}
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used inside AuthProvider');

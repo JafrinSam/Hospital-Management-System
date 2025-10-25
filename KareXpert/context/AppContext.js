@@ -1,4 +1,3 @@
-// src/context/AppContext.js
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { Platform } from 'react-native';
 import * as Device from 'expo-device';
@@ -8,17 +7,22 @@ import Constants from 'expo-constants';
 
 const AppContext = createContext(null);
 
+// --- New Storage Keys ---
+const STORAGE_USER_KEY = 'user';
+const STORAGE_TOKEN_KEY = 'accessToken';
+const STORAGE_REFRESH_TOKEN_KEY = 'refreshToken';
+const STORAGE_PHONE_KEY = 'phone';
+const STORAGE_DEVICE_ID_KEY = 'deviceId';
+// ------------------------
+
 export function AppProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [phone, setPhoneState] = useState(null); // Added phone state
   const [isLoading, setIsLoading] = useState(true);
 
   const [deviceId, setDeviceId] = useState(null);
   const [deviceName, setDeviceName] = useState(null);
   const [pushToken, setPushToken] = useState(null);
-  const [publicKey, setPublicKey] = useState(null);
-
-  const STORAGE_DEVICE_ID_KEY = 'deviceId';
-  const STORAGE_USER_KEY = 'user';
 
   const isWeb = Platform.OS === 'web';
 
@@ -61,27 +65,16 @@ export function AppProvider({ children }) {
 
   /**
    * Safe lazy registration for push tokens.
-   * - Avoids importing expo-notifications at module top-level.
-   * - Detects Expo Go at runtime using Constants.appOwnership and skips push in Expo Go.
-   * - Returns null if push isn't possible.
    */
   const registerForPushNotificationsAsync = async () => {
     try {
-      // evaluate ownership at runtime to avoid closure issues
       const appOwnership = Constants?.appOwnership ?? null;
       const runningInExpoGo = appOwnership === 'expo';
-
       if (runningInExpoGo) {
-        console.log('Skipping push token registration (running in Expo Go). Use a development build to test push.');
+        console.log('Skipping push token registration (running in Expo Go).');
         return null;
       }
-
-      if (isWeb) {
-        // Web push handled differently — skip here
-        return null;
-      }
-
-      // lazy-require expo-notifications to avoid top-level side effects
+      if (isWeb) return null;
       let Notifications;
       try {
         Notifications = require('expo-notifications');
@@ -89,13 +82,10 @@ export function AppProvider({ children }) {
         console.warn('expo-notifications not available via require()', e);
         return null;
       }
-
-      // ensure the methods we need exist
       if (!Notifications.getPermissionsAsync || !Notifications.requestPermissionsAsync) {
         console.warn('Notifications API not supported in this environment');
         return null;
       }
-
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
       if (existingStatus !== 'granted') {
@@ -106,20 +96,22 @@ export function AppProvider({ children }) {
         console.log('Push notifications permission not granted');
         return null;
       }
-
-      // get expo push token (dev-client / standalone only)
       let tokenData;
       try {
+        // This is the line that will FAIL and return null if your
+        // projectId and google-services.json are missing.
         tokenData = await Notifications.getExpoPushTokenAsync();
       } catch (err) {
-        console.warn('getExpoPushTokenAsync failed — check projectId / dev client', err?.message ?? err);
+        console.warn('getExpoPushTokenAsync failed', err?.message ?? err);
         return null;
       }
       const token = tokenData?.data ?? null;
-
-      // Create Android channel if available
       try {
-        if (Platform.OS === 'android' && Notifications.setNotificationChannelAsync && Notifications.AndroidImportance) {
+        if (
+          Platform.OS === 'android' &&
+          Notifications.setNotificationChannelAsync &&
+          Notifications.AndroidImportance
+        ) {
           await Notifications.setNotificationChannelAsync('default', {
             name: 'Default',
             importance: Notifications.AndroidImportance.MAX,
@@ -130,7 +122,8 @@ export function AppProvider({ children }) {
       } catch (e) {
         console.warn('setNotificationChannelAsync warning', e);
       }
-
+      // If setup is correct, this will return a valid token
+      // If setup is wrong, this will return null
       return token;
     } catch (e) {
       console.warn('registerForPushNotificationsAsync error', e);
@@ -138,53 +131,69 @@ export function AppProvider({ children }) {
     }
   };
 
+  // --- Updated useEffect to load session ---
   useEffect(() => {
     let cancelled = false;
 
     const init = async () => {
       try {
-        // load persisted user
+        // ... (load persisted session logic) ...
         try {
+          const token = await getFromStorage(STORAGE_TOKEN_KEY);
           const storedUser = await getFromStorage(STORAGE_USER_KEY);
-          if (storedUser) setUser(JSON.parse(storedUser));
+          const storedPhone = await getFromStorage(STORAGE_PHONE_KEY);
+          if (token && storedUser) {
+            setUser(JSON.parse(storedUser));
+            setPhoneState(storedPhone);
+          }
         } catch (e) {
-          console.warn('Failed to load persisted user', e);
+          console.warn('Failed to load persisted session', e);
         }
 
-        // load or create stable deviceId
+        // ... (load deviceId logic) ...
         let storedDeviceId = await getFromStorage(STORAGE_DEVICE_ID_KEY);
         if (!storedDeviceId) {
           try {
             storedDeviceId = Crypto.randomUUID();
           } catch (e) {
             storedDeviceId = `device-${Date.now()}`;
-            console.warn('Crypto.randomUUID failed, fallback id used', e);
           }
           await saveToStorage(STORAGE_DEVICE_ID_KEY, storedDeviceId);
         }
         if (!cancelled) setDeviceId(storedDeviceId);
 
-        // friendly name
-        let friendlyName = null;
+        // ... (load deviceName logic) ...
+        let friendlyName = Platform.OS;
         try {
           if (Device && Device.modelName) {
             friendlyName = Device.modelName;
           } else if (Device && Device.manufacturer && Device.modelId) {
             friendlyName = `${Device.manufacturer} ${Device.modelId}`;
-          } else {
-            friendlyName = Platform.OS;
           }
         } catch (e) {
-          friendlyName = Platform.OS;
+          /* fallback to Platform.OS */
         }
         if (!cancelled) setDeviceName(friendlyName);
 
-        // attempt to register for push token (safe lazy func)
+        // ***** THIS IS THE CALL *****
+        // 1. We call the function here during app start
+        console.log('Attempting to register for push notifications...');
         const token = await registerForPushNotificationsAsync();
-        if (token && !cancelled) setPushToken(token);
+
+        // 2. We set the state with the result (which is `null` for you)
+        if (token && !cancelled) {
+          console.log('Push token acquired:', token);
+          setPushToken(token);
+        } else if (!cancelled) {
+          console.log('Push token was null (check config / Expo Go).');
+          setPushToken(null);
+        }
+        // ***************************
       } catch (e) {
         console.warn('AppProvider init error', e);
       } finally {
+        // 3. ONLY after all of the above is done, we set loading to false.
+        //    This correctly tells LoginScreen it's safe to proceed.
         if (!cancelled) setIsLoading(false);
       }
     };
@@ -195,27 +204,49 @@ export function AppProvider({ children }) {
     };
   }, []);
 
-  // preserve the function names exactly
-  const login = (email, password) => {
-    console.log('Logging in with', email, password);
+  // --- New `signInWithTokens` function ---
+  const signInWithTokens = async ({ accessToken, refreshToken }, userPayload) => {
+    console.log('Signing in and storing tokens');
     try {
-      const fakeUser = {
-        id: '1',
-        name: 'Test User',
-        email,
-      };
-      setUser(fakeUser);
-      saveToStorage(STORAGE_USER_KEY, JSON.stringify(fakeUser));
+      // Save all pieces of data
+      await saveToStorage(STORAGE_TOKEN_KEY, accessToken);
+      await saveToStorage(STORAGE_REFRESH_TOKEN_KEY, refreshToken);
+      await saveToStorage(STORAGE_USER_KEY, JSON.stringify(userPayload));
+
+      // Set state
+      setUser(userPayload);
+      console.log(userPayload);
     } catch (e) {
-      console.error('Failed to log in', e);
+      console.error('Failed to sign in', e);
+      throw new Error('Failed to save session'); // Re-throw so the UI can catch it
     }
   };
 
-  const logout = () => {
-    console.log('Logging out');
+  // --- New `setPhone` function ---
+  const setPhone = async (phoneValue) => {
+    console.log('Storing phone number');
     try {
+      await saveToStorage(STORAGE_PHONE_KEY, phoneValue);
+      setPhoneState(phoneValue);
+    } catch (e) {
+      console.error('Failed to set phone', e);
+    }
+  };
+
+  // --- Updated `logout` function ---
+  const logout = async () => {
+    console.log('Logging out and clearing tokens');
+    try {
+      // Clear state
       setUser(null);
-      removeFromStorage(STORAGE_USER_KEY);
+      setPhoneState(null);
+
+      // Clear all session data from storage
+      await removeFromStorage(STORAGE_USER_KEY);
+      await removeFromStorage(STORAGE_TOKEN_KEY);
+      await removeFromStorage(STORAGE_REFRESH_TOKEN_KEY);
+      await removeFromStorage(STORAGE_PHONE_KEY);
+      // You might want to clear chat keys here too if you add them
     } catch (e) {
       console.error('Failed to log out', e);
     }
@@ -224,18 +255,18 @@ export function AppProvider({ children }) {
   const contextValue = useMemo(
     () => ({
       user,
+      phone, // Added phone
       isLoading,
-      login,
+      signInWithTokens, // Replaced `login`
+      setPhone, // Added `setPhone`
       logout,
       deviceId,
       deviceName,
-      pushToken,
-      publicKey,
-      setPublicKey,
+      pushToken, // This is `null` until the function above succeeds
       // expose ownership so UI can show "push disabled in Expo Go"
       appOwnership: Constants?.appOwnership ?? null,
     }),
-    [user, isLoading, deviceId, deviceName, pushToken, publicKey]
+    [user, phone, isLoading, deviceId, deviceName, pushToken]
   );
 
   return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;

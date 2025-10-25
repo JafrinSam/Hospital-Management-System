@@ -23,6 +23,20 @@ export default function HomeLayout() {
           headerShown: false, // We'll let the screens inside handle their own titles
         }}
       />
+          <Stack.Screen
+        name="nursehome"
+        options={{
+          
+          headerShown: false, // We'll let the screens inside handle their own titles
+        }}
+      />
+               <Stack.Screen
+        name="doctorhome"
+        options={{
+          
+          headerShown: false, // We'll let the screens inside handle their own titles
+        }}
+      />
     </Stack>
   );
 }

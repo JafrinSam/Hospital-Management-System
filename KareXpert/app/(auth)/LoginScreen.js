@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router'; // 1. Import useRouter
 import { generateOtpApi } from '../../services/api';
 import { useAppContext } from '../../context/AppContext';
 
@@ -17,13 +17,14 @@ const LoginScreen = () => {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const navigation = useNavigation();
+  const router = useRouter(); // 2. Get the router instance
 
-  // 2. Get device details and loading status from the context
+  // Get device details and loading status from the context
   const { deviceId, deviceName, isLoading: isContextLoading } = useAppContext();
 
   const handleSendOtp = async () => {
-    // 3. Ensure device details are loaded before making the API call
+    // This check correctly waits for the AppContext to finish initializing
+    // (including the push token attempt) before letting the user continue.
     if (isContextLoading || !deviceId || !deviceName) {
       Alert.alert('Initializing...', 'Please wait a moment while the app is starting.');
       return;
@@ -35,9 +36,14 @@ const LoginScreen = () => {
     }
     setLoading(true);
     try {
-      // 4. Pass the device details from context to the API function
+      // Pass the device details from context to the API function
       await generateOtpApi(phone, deviceId, deviceName);
-      navigation.navigate('OtpVerification', { phone });
+
+      // 3. Use router.push to navigate and pass params
+      router.push({
+        pathname: 'OtpVerification', // Assumes 'OtpVerification' screen is in the same (auth) group
+        params: { phone: phone },
+      });
     } catch (error) {
       Alert.alert('Error', error.message);
     } finally {
@@ -69,11 +75,14 @@ const LoginScreen = () => {
         style={[styles.button, { backgroundColor: colors.primary }]}
         onPress={handleSendOtp}
         disabled={loading || isContextLoading}>
-        {loading || isContextLoading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Send OTP</Text>
-        )}
+        {
+          /* This button is correctly disabled while the context is loading */
+          loading || isContextLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Send OTP</Text>
+          )
+        }
       </TouchableOpacity>
     </View>
   );

@@ -14,7 +14,7 @@ export default function ScheduleScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f3f4f6' }}>
       <ScrollView contentContainerStyle={{ padding: 24 }}>
-        <Text style={{ fontSize: 24, fontWeight: '700', marginBottom: 16 }}>Today's Schedule</Text>
+        <Text style={{ fontSize: 24, fontWeight: '700', marginBottom: 16 }}>{`Today's Schedule`}</Text>
 
         {schedules.map((s, i) => (
           <View key={i} style={styles.card}>

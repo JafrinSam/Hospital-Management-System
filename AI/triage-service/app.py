@@ -3,6 +3,7 @@ import os
 import joblib
 import uvicorn
 from fastapi import FastAPI, HTTPException, Body
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional, List, Dict, Any
 from pymongo import MongoClient
 import numpy as np
@@ -16,6 +17,15 @@ APPOINT_COLLECTION = os.getenv("APPOINT_COLLECTION", "appointments")
 API_KEY = os.getenv("API_KEY", None)  # optional simple auth
 
 app = FastAPI(title="Triage Priority Microservice")
+
+# --- Enable CORS for all origins ---
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ---- Load model (pipeline + label encoder + metadata) ----
 pipeline = None

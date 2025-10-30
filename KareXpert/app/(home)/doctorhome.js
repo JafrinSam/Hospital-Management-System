@@ -47,8 +47,8 @@ export default function DoctorHomeScreen() {
     );
   }
 
-  const doctorName = user?.displayName || 'Dr. Sharma';
-  const doctorId = user?.staffId || user?.id || 'D12345';
+  const doctorName = user?.name || 'Dr. Sharma';
+  const doctorId = user?.staffId || user?._id || 'D12345';
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: '#f3f4f6' }}>
@@ -83,7 +83,7 @@ export default function DoctorHomeScreen() {
         {/* Quick Actions */}
         <View style={styles.quickActions}>
           <QuickActionButton title="Patients List" icon="👩‍⚕️" route="/doctor/patients" />
-          <QuickActionButton title="Nurses List" icon="🧑‍⚕️" route="/doctor/nurses" />
+          <QuickActionButton title="Register Patients" icon="➕" route="/doctor/nurses" />
           <QuickActionButton title="Appointments" icon="🗓️" route="/doctor/appointments" />
           <QuickActionButton title="Lab Reports" icon="🧪" route="/doctor/labs" />
         </View>

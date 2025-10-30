@@ -66,8 +66,8 @@ export default function HomeScreen() {
 
   // 7. If we are NOT loading AND we have a user, render the Home Screen
   //    Get the patient name dynamically from the user object
-  const patientName = user.displayName || 'Priya';
-  const patientId = user.id || 'unknown'; // Assuming user object has an 'id'
+  const patientName = user?.name || 'Priya';
+  const patientId = user?._id || 'unknown'; // Assuming user object has an 'id'
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: '#f3f4f6' }}>

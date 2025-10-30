@@ -16,7 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Camera } from 'expo-camera';
 
 import { useAppContext } from '../../context/AppContext';
-import {SearchIcon} from '../../components/SearchIcon';
+import { SearchIcon } from '../../components/SearchIcon';
 
 export default function NurseHomeScreen() {
   const router = useRouter();
@@ -48,14 +48,20 @@ export default function NurseHomeScreen() {
     );
   }
 
-  const nurseName = user?.displayName || 'Sree';
-  const nurseId = user?.staffId || user?.id || 'unknown-staff';
+  const nurseName = user?.name || 'Sree';
+  const nurseId = user?.staffId || user?._id || 'unknown-staff';
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: '#f3f4f6' }}>
       <ScrollView contentContainerStyle={{ padding: 24 }} showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View style={{ marginBottom: 32, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <View
+          style={{
+            marginBottom: 32,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}>
           <View>
             <Text style={{ color: '#6b7280', fontSize: 16 }}>Welcome back,</Text>
             <Text style={{ color: '#111827', fontSize: 28, fontWeight: '700' }}>{nurseName}</Text>
@@ -77,8 +83,7 @@ export default function NurseHomeScreen() {
 
           <TouchableOpacity
             onPress={() => router.push('/nurse/nurseprofilescreen')}
-            style={styles.viewScheduleButton}
-          >
+            style={styles.viewScheduleButton}>
             <Text style={styles.viewScheduleText}>Nurse Profile</Text>
           </TouchableOpacity>
         </View>
@@ -97,16 +102,23 @@ export default function NurseHomeScreen() {
             Patient Queue
           </Text>
           <PatientQueueCard patientName="Rohan Gupta" reason="Vitals Check" roomNumber="302A" />
-          <PatientQueueCard patientName="Sunita Patel" reason="Post-Op Follow-up" roomNumber="305B" />
+          <PatientQueueCard
+            patientName="Sunita Patel"
+            reason="Post-Op Follow-up"
+            roomNumber="305B"
+          />
           <PatientQueueCard patientName="Amit Singh" reason="Medication Admin" roomNumber="302A" />
-          <PatientQueueCard patientName="Neha Sharma" reason="Pre-Surgery Vitals" roomNumber="308C" />
+          <PatientQueueCard
+            patientName="Neha Sharma"
+            reason="Pre-Surgery Vitals"
+            roomNumber="308C"
+          />
         </View>
 
         {/* Report an Issue */}
         <Pressable
           onPress={() => console.log('Issue Reported')}
-          style={({ pressed }) => [styles.issueButton, { opacity: pressed ? 0.85 : 1 }]}
-        >
+          style={({ pressed }) => [styles.issueButton, { opacity: pressed ? 0.85 : 1 }]}>
           <Text style={styles.issueButtonText}>Report an Issue</Text>
         </Pressable>
       </ScrollView>
@@ -119,7 +131,7 @@ export default function NurseHomeScreen() {
               <Camera
                 style={{ width: '100%', height: 400, borderRadius: 16 }}
                 onBarCodeScanned={scannedData ? undefined : handleBarcodeScanned}
-barCodeScannerSettings={{ barCodeTypes: ['qr'] }}
+                barCodeScannerSettings={{ barCodeTypes: ['qr'] }}
               />
             ) : (
               <Text style={{ color: 'white', textAlign: 'center', fontSize: 16 }}>
@@ -128,8 +140,11 @@ barCodeScannerSettings={{ barCodeTypes: ['qr'] }}
             )}
 
             {scannedData && (
-              <View style={{ padding: 12, backgroundColor: '#f3f4f6', borderRadius: 8, marginTop: 12 }}>
-                <Text style={{ textAlign: 'center', fontSize: 16, color: '#111827' }}>{scannedData}</Text>
+              <View
+                style={{ padding: 12, backgroundColor: '#f3f4f6', borderRadius: 8, marginTop: 12 }}>
+                <Text style={{ textAlign: 'center', fontSize: 16, color: '#111827' }}>
+                  {scannedData}
+                </Text>
               </View>
             )}
           </Pressable>
@@ -157,8 +172,7 @@ const QuickActionButton = ({ title, icon, route }) => {
         shadowOpacity: 0.03,
         shadowRadius: 4,
         elevation: 1,
-      }}
-    >
+      }}>
       <Text style={{ fontSize: 36, marginBottom: 8 }}>{icon}</Text>
       <Text style={{ fontSize: 15, fontWeight: '600', color: '#111827' }}>{title}</Text>
     </TouchableOpacity>
@@ -180,8 +194,7 @@ const PatientQueueCard = ({ patientName, reason, roomNumber }) => (
       shadowOpacity: 0.03,
       shadowRadius: 6,
       elevation: 1,
-    }}
-  >
+    }}>
     <View>
       <Text style={{ fontSize: 16, fontWeight: '700', color: '#111827' }}>{patientName}</Text>
       <Text style={{ marginTop: 6, fontSize: 13, fontWeight: '600', color: '#6b7280' }}>
@@ -196,16 +209,66 @@ const PatientQueueCard = ({ patientName, reason, roomNumber }) => (
 );
 
 const styles = StyleSheet.create({
-  loadingContainer: { flex: 1, backgroundColor: '#f3f4f6', justifyContent: 'center', alignItems: 'center' },
-  overviewCard: { marginBottom: 24, borderRadius: 20, backgroundColor: '#2563eb', padding: 20, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 6, elevation: 3 },
-  overviewTitle: { color: 'rgba(255,255,255,0.85)', marginBottom: 8, fontSize: 16, fontWeight: '600' },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#f3f4f6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  overviewCard: {
+    marginBottom: 24,
+    borderRadius: 20,
+    backgroundColor: '#2563eb',
+    padding: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  overviewTitle: {
+    color: 'rgba(255,255,255,0.85)',
+    marginBottom: 8,
+    fontSize: 16,
+    fontWeight: '600',
+  },
   overviewBigText: { color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 4 },
   overviewSmallText: { color: 'rgba(255,255,255,0.9)', marginBottom: 16 },
-  viewScheduleButton: { backgroundColor: '#fff', padding: 12, borderRadius: 10, alignItems: 'center' },
+  viewScheduleButton: {
+    backgroundColor: '#fff',
+    padding: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
   viewScheduleText: { color: '#2563eb', fontSize: 16, fontWeight: '700' },
-  quickActions: { marginBottom: 24, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  issueButton: { borderRadius: 20, borderWidth: 1, borderColor: '#e5e7eb', backgroundColor: '#fff', padding: 18, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, elevation: 1 },
+  quickActions: {
+    marginBottom: 24,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  issueButton: {
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#fff',
+    padding: 18,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
+  },
   issueButtonText: { textAlign: 'center', fontSize: 16, fontWeight: '600', color: '#111827' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
-  modalContent: { backgroundColor: 'black', padding: 12, borderRadius: 16, width: '90%', alignItems: 'center' },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'black',
+    padding: 12,
+    borderRadius: 16,
+    width: '90%',
+    alignItems: 'center',
+  },
 });

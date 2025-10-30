@@ -16,127 +16,125 @@ type Patient = {
 };
 
 export default function TriageAdminPage() {
-const [patients, setPatients] = useState<Patient[]>([
-  {
-    "triage_code": 501,
-    "gender": "Male",
-    "age": 25,
-    "ChiefComplaint": "Routine Checkup",
-    "BlooddpressurSystol": 120,
-    "BlooddpressurDiastol": 78,
-    "PulseRate": 70,
-    "RespiratoryRate": 16,
-    "Temperature": 36.7,
-    "O2Saturation": 98,
-    "AVPU": 1
-  },
-  {
-    "triage_code": 502,
-    "gender": "Female",
-    "age": 40,
-    "ChiefComplaint": "Headache",
-    "BlooddpressurSystol": 125,
-    "BlooddpressurDiastol": 80,
-    "PulseRate": 72,
-    "RespiratoryRate": 16,
-    "Temperature": 36.8,
-    "O2Saturation": 97,
-    "AVPU": 1
-  },
-  {
-    "triage_code": 503,
-    "gender": "Male",
-    "age": 60,
-    "ChiefComplaint": "Follow-up visit",
-    "BlooddpressurSystol": 130,
-    "BlooddpressurDiastol": 82,
-    "PulseRate": 75,
-    "RespiratoryRate": 18,
-    "Temperature": 37.0,
-    "O2Saturation": 96,
-    "AVPU": 1
-  },
-  {
-    "triage_code": 601,
-    "gender": "Female",
-    "age": 70,
-    "ChiefComplaint": "Fever and cough",
-    "BlooddpressurSystol": 150,
-    "BlooddpressurDiastol": 90,
-    "PulseRate": 105,
-    "RespiratoryRate": 22,
-    "Temperature": 39.5,
-    "O2Saturation": 92,
-    "AVPU": 1
-  },
-  {
-    "triage_code": 602,
-    "gender": "Male",
-    "age": 55,
-    "ChiefComplaint": "Chest discomfort",
-    "BlooddpressurSystol": 145,
-    "BlooddpressurDiastol": 88,
-    "PulseRate": 110,
-    "RespiratoryRate": 24,
-    "Temperature": 37.4,
-    "O2Saturation": 93,
-    "AVPU": 1
-  },
-  {
-    "triage_code": 603,
-    "gender": "Female",
-    "age": 68,
-    "ChiefComplaint": "Shortness of breath",
-    "BlooddpressurSystol": 135,
-    "BlooddpressurDiastol": 84,
-    "PulseRate": 98,
-    "RespiratoryRate": 26,
-    "Temperature": 38.2,
-    "O2Saturation": 91,
-    "AVPU": 1
-  },
-  {
-    "triage_code": 701,
-    "gender": "Male",
-    "age": 80,
-    "ChiefComplaint": "Collapse / unconscious",
-    "BlooddpressurSystol": 78,
-    "BlooddpressurDiastol": 48,
-    "PulseRate": 50,
-    "RespiratoryRate": 10,
-    "Temperature": 36.4,
-    "O2Saturation": 85,
-    "AVPU": 3
-  },
-  {
-    "triage_code": 702,
-    "gender": "Female",
-    "age": 50,
-    "ChiefComplaint": "Severe respiratory distress",
-    "BlooddpressurSystol": 190,
-    "BlooddpressurDiastol": 115,
-    "PulseRate": 140,
-    "RespiratoryRate": 36,
-    "Temperature": 39.0,
-    "O2Saturation": 82,
-    "AVPU": 2
-  },
-  {
-    "triage_code": 703,
-    "gender": "Male",
-    "age": 30,
-    "ChiefComplaint": "Major trauma",
-    "BlooddpressurSystol": 95,
-    "BlooddpressurDiastol": 60,
-    "PulseRate": 45,
-    "RespiratoryRate": 6,
-    "Temperature": 36.0,
-    "O2Saturation": 88,
-    "AVPU": 3
-  }
-
+  const [patients, setPatients] = useState<Patient[]>([
+    {
+      triage_code: 501,
+      gender: "Male",
+      age: 25,
+      ChiefComplaint: "Routine Checkup",
+      BlooddpressurSystol: 120,
+      BlooddpressurDiastol: 78,
+      PulseRate: 70,
+      RespiratoryRate: 16,
+      Temperature: 36.7,
+      O2Saturation: 98,
+      AVPU: 1,
+    },
+    {
+      triage_code: 502,
+      gender: "Female",
+      age: 40,
+      ChiefComplaint: "Headache",
+      BlooddpressurSystol: 125,
+      BlooddpressurDiastol: 80,
+      PulseRate: 72,
+      RespiratoryRate: 16,
+      Temperature: 36.8,
+      O2Saturation: 97,
+      AVPU: 1,
+    },
+    {
+      triage_code: 503,
+      gender: "Male",
+      age: 60,
+      ChiefComplaint: "Follow-up visit",
+      BlooddpressurSystol: 130,
+      BlooddpressurDiastol: 82,
+      PulseRate: 75,
+      RespiratoryRate: 18,
+      Temperature: 37.0,
+      O2Saturation: 96,
+      AVPU: 1,
+    },
+    {
+      triage_code: 601,
+      gender: "Female",
+      age: 70,
+      ChiefComplaint: "Fever and cough",
+      BlooddpressurSystol: 150,
+      BlooddpressurDiastol: 90,
+      PulseRate: 105,
+      RespiratoryRate: 22,
+      Temperature: 39.5,
+      O2Saturation: 92,
+      AVPU: 1,
+    },
+    {
+      triage_code: 602,
+      gender: "Male",
+      age: 55,
+      ChiefComplaint: "Chest discomfort",
+      BlooddpressurSystol: 145,
+      BlooddpressurDiastol: 88,
+      PulseRate: 110,
+      RespiratoryRate: 24,
+      Temperature: 37.4,
+      O2Saturation: 93,
+      AVPU: 1,
+    },
+    {
+      triage_code: 603,
+      gender: "Female",
+      age: 68,
+      ChiefComplaint: "Shortness of breath",
+      BlooddpressurSystol: 135,
+      BlooddpressurDiastol: 84,
+      PulseRate: 98,
+      RespiratoryRate: 26,
+      Temperature: 38.2,
+      O2Saturation: 91,
+      AVPU: 1,
+    },
+    {
+      triage_code: 701,
+      gender: "Male",
+      age: 80,
+      ChiefComplaint: "Collapse / unconscious",
+      BlooddpressurSystol: 78,
+      BlooddpressurDiastol: 48,
+      PulseRate: 50,
+      RespiratoryRate: 10,
+      Temperature: 36.4,
+      O2Saturation: 85,
+      AVPU: 3,
+    },
+    {
+      triage_code: 702,
+      gender: "Female",
+      age: 50,
+      ChiefComplaint: "Severe respiratory distress",
+      BlooddpressurSystol: 190,
+      BlooddpressurDiastol: 115,
+      PulseRate: 140,
+      RespiratoryRate: 36,
+      Temperature: 39.0,
+      O2Saturation: 82,
+      AVPU: 2,
+    },
+    {
+      triage_code: 703,
+      gender: "Male",
+      age: 30,
+      ChiefComplaint: "Major trauma",
+      BlooddpressurSystol: 95,
+      BlooddpressurDiastol: 60,
+      PulseRate: 45,
+      RespiratoryRate: 6,
+      Temperature: 36.0,
+      O2Saturation: 88,
+      AVPU: 3,
+    },
   ]);
-
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -182,7 +180,7 @@ const [patients, setPatients] = useState<Patient[]>([
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/predict?apply_update=false",
+        "http://127.0.0.1:5000/predict?apply_update=false",
         patients
       );
       setResult(response.data);
@@ -228,7 +226,9 @@ const [patients, setPatients] = useState<Patient[]>([
                 <input
                   type="number"
                   value={p.triage_code}
-                  onChange={(e) => handleChange(i, "triage_code", Number(e.target.value))}
+                  onChange={(e) =>
+                    handleChange(i, "triage_code", Number(e.target.value))
+                  }
                   className="w-16 p-1 border rounded"
                 />
               </td>
@@ -246,7 +246,9 @@ const [patients, setPatients] = useState<Patient[]>([
                 <input
                   type="number"
                   value={p.age}
-                  onChange={(e) => handleChange(i, "age", Number(e.target.value))}
+                  onChange={(e) =>
+                    handleChange(i, "age", Number(e.target.value))
+                  }
                   className="w-16 p-1 border rounded"
                 />
               </td>
@@ -254,7 +256,9 @@ const [patients, setPatients] = useState<Patient[]>([
                 <input
                   type="text"
                   value={p.ChiefComplaint}
-                  onChange={(e) => handleChange(i, "ChiefComplaint", e.target.value)}
+                  onChange={(e) =>
+                    handleChange(i, "ChiefComplaint", e.target.value)
+                  }
                   className="w-full p-1 border rounded"
                 />
               </td>
@@ -263,7 +267,11 @@ const [patients, setPatients] = useState<Patient[]>([
                   type="number"
                   value={p.BlooddpressurSystol}
                   onChange={(e) =>
-                    handleChange(i, "BlooddpressurSystol", Number(e.target.value))
+                    handleChange(
+                      i,
+                      "BlooddpressurSystol",
+                      Number(e.target.value)
+                    )
                   }
                   className="w-16 p-1 border rounded"
                 />
@@ -272,7 +280,11 @@ const [patients, setPatients] = useState<Patient[]>([
                   type="number"
                   value={p.BlooddpressurDiastol}
                   onChange={(e) =>
-                    handleChange(i, "BlooddpressurDiastol", Number(e.target.value))
+                    handleChange(
+                      i,
+                      "BlooddpressurDiastol",
+                      Number(e.target.value)
+                    )
                   }
                   className="w-16 p-1 border rounded"
                 />
@@ -281,7 +293,9 @@ const [patients, setPatients] = useState<Patient[]>([
                 <input
                   type="number"
                   value={p.PulseRate}
-                  onChange={(e) => handleChange(i, "PulseRate", Number(e.target.value))}
+                  onChange={(e) =>
+                    handleChange(i, "PulseRate", Number(e.target.value))
+                  }
                   className="w-16 p-1 border rounded"
                 />
               </td>
@@ -289,7 +303,9 @@ const [patients, setPatients] = useState<Patient[]>([
                 <input
                   type="number"
                   value={p.RespiratoryRate}
-                  onChange={(e) => handleChange(i, "RespiratoryRate", Number(e.target.value))}
+                  onChange={(e) =>
+                    handleChange(i, "RespiratoryRate", Number(e.target.value))
+                  }
                   className="w-16 p-1 border rounded"
                 />
               </td>
@@ -297,7 +313,9 @@ const [patients, setPatients] = useState<Patient[]>([
                 <input
                   type="number"
                   value={p.Temperature}
-                  onChange={(e) => handleChange(i, "Temperature", Number(e.target.value))}
+                  onChange={(e) =>
+                    handleChange(i, "Temperature", Number(e.target.value))
+                  }
                   className="w-16 p-1 border rounded"
                 />
               </td>
@@ -305,7 +323,9 @@ const [patients, setPatients] = useState<Patient[]>([
                 <input
                   type="number"
                   value={p.O2Saturation}
-                  onChange={(e) => handleChange(i, "O2Saturation", Number(e.target.value))}
+                  onChange={(e) =>
+                    handleChange(i, "O2Saturation", Number(e.target.value))
+                  }
                   className="w-16 p-1 border rounded"
                 />
               </td>
@@ -313,7 +333,9 @@ const [patients, setPatients] = useState<Patient[]>([
                 <input
                   type="number"
                   value={p.AVPU}
-                  onChange={(e) => handleChange(i, "AVPU", Number(e.target.value))}
+                  onChange={(e) =>
+                    handleChange(i, "AVPU", Number(e.target.value))
+                  }
                   className="w-16 p-1 border rounded"
                 />
               </td>
@@ -340,7 +362,9 @@ const [patients, setPatients] = useState<Patient[]>([
       {result && (
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-bold mb-2">AI Prediction Result</h2>
-          <pre className="whitespace-pre-wrap">{JSON.stringify(result, null, 2)}</pre>
+          <pre className="whitespace-pre-wrap">
+            {JSON.stringify(result, null, 2)}
+          </pre>
         </div>
       )}
     </div>
